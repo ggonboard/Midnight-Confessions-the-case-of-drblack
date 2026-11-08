@@ -2729,10 +2729,6 @@ export default function App() {
     r => r !== playerLocation
   ).sort();
 
-  // Categorize rooms by adjacent (1 AP) vs distant (2 AP)
-  const adjacentRoomsList = allMansionRooms.filter(r => getMoveCost(playerLocation, r) === 1);
-  const distantRoomsList = allMansionRooms.filter(r => getMoveCost(playerLocation, r) === 2);
-
   // Check if a real suspect is currently in the player's room
   const currentSuspectInRoom = gameDataRef.current.solution?.entities.find(
     e => e.loop[e.startIndex] === playerLocation && (e.id === 'K' || e.id === 'A' || (e.id === 'I' && e.name !== 'Nobody'))
@@ -3083,57 +3079,31 @@ export default function App() {
                   <select
                     value={moveDropdownVal}
                     onChange={e => setMoveDropdownVal(e.target.value)}
-                    className="w-full bg-[#faf6ee] border border-[#8b6e2d]/70 text-stone-900 rounded p-2.5 text-sm font-medium focus:outline-hidden focus:ring-1 focus:ring-[#8b6e2d]"
+                    className="w-full bg-[#faf6ee] border border-[#8b6e2d]/70 text-stone-900 rounded p-2.5 text-xs font-medium focus:outline-hidden focus:ring-1 focus:ring-[#8b6e2d]"
                   >
                     <option value="">-- Choose Any Room in the Manor --</option>
-                    <optgroup label="Directly Connected Chambers (Adjacent • 1 AP ⚡)">
-                      {adjacentRoomsList.map((room, idx) => {
-                        const isAlfredRoom = room === (aiStats.loc || localStorage.getItem('aiLoc_' + activeSeed));
-                        const lockedChamber = localStorage.getItem('lockedRoom_' + activeSeed);
-                        const isLockedRoom = room === lockedChamber && !isRoomUnlocked;
-                        const dirMatch = currentDirections.find(cd => cd.room === room);
-                        const dirLabel = dirMatch ? ` (${dirMatch.dir})` : '';
-                        return (
-                          <option
-                            key={`adj-${idx}`}
-                            value={room}
-                            disabled={isAlfredRoom}
-                            className={
-                              isAlfredRoom
-                                ? 'text-red-700 bg-red-50'
-                                : isLockedRoom
-                                ? 'text-amber-800 bg-amber-50 font-bold'
-                                : 'text-stone-900 font-semibold'
-                            }
-                          >
-                            {room}{dirLabel} — {isAlfredRoom ? '⛔ Occupied by Alfred • Forbidden' : isLockedRoom ? '🔒 Locked (Passcode Req.) • 1 AP ⚡' : '1 AP ⚡'}
-                          </option>
-                        );
-                      })}
-                    </optgroup>
-                    <optgroup label="Other Mansion Chambers (Distant • 2 AP ⚡)">
-                      {distantRoomsList.map((room, idx) => {
-                        const isAlfredRoom = room === (aiStats.loc || localStorage.getItem('aiLoc_' + activeSeed));
-                        const lockedChamber = localStorage.getItem('lockedRoom_' + activeSeed);
-                        const isLockedRoom = room === lockedChamber && !isRoomUnlocked;
-                        return (
-                          <option
-                            key={`dist-${idx}`}
-                            value={room}
-                            disabled={isAlfredRoom}
-                            className={
-                              isAlfredRoom
-                                ? 'text-red-700 bg-red-50'
-                                : isLockedRoom
-                                ? 'text-amber-800 bg-amber-50 font-bold'
-                                : 'text-stone-800'
-                            }
-                          >
-                            {room} — {isAlfredRoom ? '⛔ Occupied by Alfred • Forbidden' : isLockedRoom ? '🔒 Locked (Passcode Req.) • 2 AP ⚡' : '2 AP ⚡'}
-                          </option>
-                        );
-                      })}
-                    </optgroup>
+                    {allMansionRooms.map((room, idx) => {
+                      const cost = getMoveCost(playerLocation, room);
+                      const isAlfredRoom = room === (aiStats.loc || localStorage.getItem('aiLoc_' + activeSeed));
+                      const lockedChamber = localStorage.getItem('lockedRoom_' + activeSeed);
+                      const isLockedRoom = room === lockedChamber && !isRoomUnlocked;
+                      return (
+                        <option
+                          key={idx}
+                          value={room}
+                          disabled={isAlfredRoom}
+                          className={
+                            isAlfredRoom
+                              ? 'text-red-700 bg-red-50'
+                              : isLockedRoom
+                              ? 'text-amber-800 bg-amber-50 font-bold'
+                              : 'text-stone-900'
+                          }
+                        >
+                          {isLockedRoom ? `🔒 ${room}` : room} — {isAlfredRoom ? '⛔ Occupied by Alfred' : `${cost} AP ⚡`}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -3154,14 +3124,12 @@ export default function App() {
                           </div>
                           <div className="text-xs text-stone-600 font-sans mt-0.5">
                             {moveDropdownVal
-                              ? selectedCost === 1
-                                ? `Adjacent chamber: ${moveDropdownVal} (costs 1 AP)`
-                                : `Distant passage: ${moveDropdownVal} (costs 2 AP)`
-                              : 'Adjacent rooms cost 1 AP • Any other location costs 2 AP'}
+                              ? `${moveDropdownVal} (${selectedCost} AP)`
+                              : 'Select any room in the mansion (1–2 AP)'}
                           </div>
                         </div>
                       </div>
-                      <div className="text-[11px] font-bold font-mono px-2.5 py-1 rounded bg-[#f5eedf] text-[#8b6e2d] border border-[#8b6e2d]/60">
+                      <div className="text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-[#f5eedf] text-[#8b6e2d] border border-[#8b6e2d]/60">
                         {selectedCost ? `${selectedCost} AP ⚡` : '1–2 AP ⚡'}
                       </div>
                     </button>
