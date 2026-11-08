@@ -814,7 +814,7 @@ header {
 // --- FIREBASE CLOUD CONFIGURATION ---
 let db = null;
 const firebaseConfig = {
-    apiKey: "AIzaSyAND5d0vH29KieJ9nvdivKlfhrwpJzgWLM",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "di-lockewood.firebaseapp.com",
     projectId: "di-lockewood",
     storageBucket: "di-lockewood.firebasestorage.app",
