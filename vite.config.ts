@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/Midnight-Confessions-the-case-of-drblack/'
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
